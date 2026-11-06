@@ -8,6 +8,11 @@ BUCKET_NAME = os.environ.get("BUCKET_NAME", "mi-sitio-miguel")
 
 s3 = boto3.client("s3")
 
+# ID de tu cuenta de AWS: se le dice a S3 que el bucket debe ser tuyo.
+# Si defines AWS_ACCOUNT_ID se usa ese; si no, se consulta con sts.
+ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID") or boto3.client("sts").get_caller_identity()["Account"]
+OWNER_ARGS = {"ExpectedBucketOwner": ACCOUNT_ID}
+
 
 def subir():
     ruta = input("Ruta del archivo a subir: ").strip().strip('"')
@@ -15,7 +20,7 @@ def subir():
     if not nombre:
         nombre = os.path.basename(ruta)
     try:
-        s3.upload_file(ruta, BUCKET_NAME, nombre)
+        s3.upload_file(ruta, BUCKET_NAME, nombre, ExtraArgs=OWNER_ARGS)
         print(f"✅ Subido: {nombre}")
     except (ClientError, FileNotFoundError) as e:
         print(f"❌ Error: {e}")
@@ -25,7 +30,7 @@ def descargar():
     nombre = input("Nombre del archivo en el bucket: ").strip()
     destino = input("Guardar como (Enter = mismo nombre): ").strip() or os.path.basename(nombre)
     try:
-        s3.download_file(BUCKET_NAME, nombre, destino)
+        s3.download_file(BUCKET_NAME, nombre, destino, ExtraArgs=OWNER_ARGS)
         print(f"✅ Descargado en: {destino}")
     except ClientError as e:
         print(f"❌ Error: {e}")
@@ -34,7 +39,7 @@ def descargar():
 def eliminar():
     nombre = input("Nombre del archivo a eliminar: ").strip()
     try:
-        s3.delete_object(Bucket=BUCKET_NAME, Key=nombre)
+        s3.delete_object(Bucket=BUCKET_NAME, Key=nombre, **OWNER_ARGS)
         print(f"🗑️ Eliminado: {nombre}")
     except ClientError as e:
         print(f"❌ Error: {e}")
@@ -42,7 +47,7 @@ def eliminar():
 
 def listar():
     try:
-        resp = s3.list_objects_v2(Bucket=BUCKET_NAME)
+        resp = s3.list_objects_v2(Bucket=BUCKET_NAME, **OWNER_ARGS)
         items = resp.get("Contents", [])
         if not items:
             print("📂 El bucket está vacío")
