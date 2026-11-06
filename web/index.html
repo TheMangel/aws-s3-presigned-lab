@@ -267,10 +267,10 @@
     <h1>Iniciar sesión</h1>
     <p class="sub">Panel de administración · Gestión de clientes &amp; almacenamiento S3</p>
 
-    <label class="field-label">Usuario</label>
+    <label class="field-label" for="login-user">Usuario</label>
     <input class="txt" id="login-user" type="text" placeholder="miguel" autocomplete="username">
 
-    <label class="field-label">Contraseña</label>
+    <label class="field-label" for="login-pass">Contraseña</label>
     <input class="txt" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
 
     <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
@@ -312,16 +312,16 @@
       <div class="panel">
         <h3>Gestión de clientes</h3>
         <div class="form-stack">
-          <input class="txt" id="c-id" type="text" placeholder="ID Cliente">
-          <input class="txt" id="c-nombre" type="text" placeholder="Nombre">
-          <input class="txt" id="c-correo" type="email" placeholder="Correo">
-          <input class="txt" id="c-ciudad" type="text" placeholder="Ciudad">
+          <input class="txt" id="c-id" type="text" placeholder="ID Cliente" aria-label="ID Cliente">
+          <input class="txt" id="c-nombre" type="text" placeholder="Nombre" aria-label="Nombre">
+          <input class="txt" id="c-correo" type="email" placeholder="Correo" aria-label="Correo">
+          <input class="txt" id="c-ciudad" type="text" placeholder="Ciudad" aria-label="Ciudad">
           <button class="btn-block" onclick="saveClient()">Guardar</button>
         </div>
 
         <div class="divider-label">Buscar</div>
         <div class="row-2">
-          <input class="txt" id="c-search" type="text" placeholder="Buscar por ID">
+          <input class="txt" id="c-search" type="text" placeholder="Buscar por ID" aria-label="Buscar por ID">
           <button class="btn-block secondary" onclick="searchClient()">Buscar</button>
         </div>
 
@@ -346,15 +346,15 @@
         <div class="panel" style="margin-bottom:26px;">
           <h3>Subir archivo a S3</h3>
 
-          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Seleccionar o arrastrar un archivo" onclick="document.getElementById('file-input').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('file-input').click();}">
             <div class="icon">📁</div>
             <p><b>Haz clic</b> o arrastra un archivo aquí</p>
           </div>
-          <input type="file" id="file-input">
+          <input type="file" id="file-input" aria-label="Seleccionar archivo para subir">
           <div id="file-error" style="display:none; color:#ffb4a3; background:rgba(232,96,63,.12); border:1px solid rgba(232,96,63,.35); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:12px;"></div>
           <div class="file-chip" id="file-chip">
             <span id="file-name">—</span>
-            <span class="x" onclick="clearFile(event)">✕</span>
+            <span class="x" role="button" tabindex="0" aria-label="Quitar archivo" onclick="clearFile(event)" onkeydown="if(event.key==='Enter'||event.key===' '){clearFile(event);}">✕</span>
           </div>
 
           <button class="btn-block" onclick="uploadToS3()">Subir a S3</button>
@@ -574,7 +574,7 @@
       if(!subida.ok) throw new Error('Error al subir a S3 (' + subida.status + ')');
 
       logMsg('Subido correctamente: ' + selectedFile.name, 'ok');
-      const filesCount = parseInt(localStorage.getItem('miguel_files_count') || '0') + 1;
+      const filesCount = Number.parseInt(localStorage.getItem('miguel_files_count') || '0', 10) + 1;
       localStorage.setItem('miguel_files_count', filesCount);
       document.getElementById('stat-files').textContent = filesCount;
       clearFile({stopPropagation(){}});
