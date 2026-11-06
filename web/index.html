@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miguel Cloud · Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#0b1220;
+    --navy-800:#101a30;
+    --navy-700:#16223e;
+    --navy-600:#1e2c4d;
+    --field:#dbe4f2;
+    --field-text:#1a2438;
+    --coral:#e8603f;
+    --coral-dark:#c94d30;
+    --coral-glow: rgba(232,96,63,.35);
+    --text:#eef1f7;
+    --text-dim:#8b96ad;
+    --line:#243256;
+    font-family:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(232,96,63,.10), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(66,90,168,.18), transparent 50%),
+      var(--navy-900);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.logo,.btn,.tag{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- LOGIN ---------- */
+  #login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+  }
+  .grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(circle at 50% 40%, black, transparent 75%);
+    pointer-events:none;
+  }
+  .login-card{
+    position:relative;
+    width:100%;
+    max-width:400px;
+    background:linear-gradient(180deg, var(--navy-700), var(--navy-800));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:40px 36px 34px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+  }
+  .login-mark{
+    display:flex; align-items:center; gap:10px; margin-bottom:28px;
+  }
+  .login-mark .dot{
+    width:11px; height:11px; border-radius:3px;
+    background:var(--coral);
+    box-shadow:0 0 16px var(--coral-glow);
+    transform:rotate(45deg);
+  }
+  .login-mark span{
+    font-size:14px; letter-spacing:.14em; color:var(--text-dim); text-transform:uppercase;
+  }
+  .login-card h1{
+    font-size:26px; font-weight:700; line-height:1.25; margin-bottom:6px;
+  }
+  .login-card p.sub{
+    color:var(--text-dim); font-size:14px; margin-bottom:30px;
+  }
+  .field-label{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim);
+    display:block; margin-bottom:7px; margin-top:16px;
+  }
+  .field-label:first-of-type{margin-top:0;}
+  input.txt, select.txt{
+    width:100%;
+    background:var(--field);
+    color:var(--field-text);
+    border:none;
+    border-radius:9px;
+    padding:13px 14px;
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+    transition:box-shadow .15s ease;
+  }
+  input.txt:focus, select.txt:focus{box-shadow:0 0 0 3px var(--coral-glow);}
+  .btn-primary{
+    margin-top:26px;
+    width:100%;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    padding:14px;
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:.02em;
+    cursor:pointer;
+    transition:transform .12s ease, background .15s ease, box-shadow .15s ease;
+    box-shadow:0 10px 24px -8px var(--coral-glow);
+  }
+  .btn-primary:hover{background:var(--coral-dark); transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0px);}
+  .login-hint{
+    margin-top:20px; font-size:12px; color:var(--text-dim); text-align:center;
+    border-top:1px dashed var(--line); padding-top:16px;
+  }
+  .login-hint b{color:#c7cfe2;}
+  .login-error{
+    display:none;
+    margin-top:14px;
+    font-size:12.5px;
+    color:#ffb4a3;
+    background:rgba(232,96,63,.12);
+    border:1px solid rgba(232,96,63,.35);
+    border-radius:8px;
+    padding:9px 12px;
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  #dashboard{display:none;}
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 36px;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.015);
+  }
+  .brand{display:flex; align-items:center; gap:11px;}
+  .brand .dot{
+    width:12px; height:12px; border-radius:3px; background:var(--coral);
+    box-shadow:0 0 16px var(--coral-glow); transform:rotate(45deg);
+  }
+  .brand h1{font-size:19px; font-weight:700;}
+  .brand .who{font-size:11.5px; color:var(--text-dim); margin-top:1px;}
+  .top-actions{display:flex; align-items:center; gap:14px;}
+  .status-pill{
+    font-size:11.5px; color:#8bd9a5; background:rgba(63,180,109,.12);
+    border:1px solid rgba(63,180,109,.3); padding:6px 12px; border-radius:999px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .status-pill .bulb{width:6px; height:6px; border-radius:50%; background:#4bd67c; box-shadow:0 0 8px #4bd67c;}
+  .btn-ghost{
+    background:transparent; color:var(--text-dim); border:1px solid var(--line);
+    padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif;
+    transition:.15s;
+  }
+  .btn-ghost:hover{color:var(--text); border-color:#3a4a75;}
+
+  main{padding:40px 36px 70px; max-width:1280px; margin:0 auto;}
+  .title-row{margin-bottom:32px;}
+  .title-row h2{font-size:28px; font-weight:700;}
+  .title-row p{color:var(--text-dim); font-size:14px; margin-top:6px;}
+
+  .panels{display:grid; grid-template-columns:1.05fr 1fr; gap:26px;}
+  @media (max-width:920px){.panels{grid-template-columns:1fr;}}
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-700), var(--navy-800));
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 26px 28px;
+  }
+  .panel h3{
+    font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:18px; display:flex; align-items:center; gap:8px;
+  }
+  .panel h3::before{content:''; width:4px; height:14px; background:var(--coral); border-radius:2px;}
+
+  .form-stack input, .form-stack select{margin-bottom:11px;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+  .btn-block{
+    width:100%; background:var(--coral); color:#fff; border:none; border-radius:9px;
+    padding:12.5px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;
+    transition:.15s;
+  }
+  .btn-block:hover{background:var(--coral-dark);}
+  .btn-block.secondary{
+    background:transparent; border:1px solid var(--line); color:var(--text-dim);
+  }
+  .btn-block.secondary:hover{color:var(--text); border-color:#3a4a75;}
+
+  .divider-label{
+    font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;
+    margin:20px 0 10px; display:flex; align-items:center; gap:10px;
+  }
+  .divider-label::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  table.client-table{width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px;}
+  table.client-table th{
+    text-align:left; color:var(--text-dim); font-weight:500; font-size:10.5px;
+    text-transform:uppercase; letter-spacing:.05em; padding:8px 8px; border-bottom:1px solid var(--line);
+  }
+  table.client-table td{padding:9px 8px; border-bottom:1px solid rgba(255,255,255,.04);}
+  table.client-table tr:last-child td{border-bottom:none;}
+  .empty-row td{color:var(--text-dim); text-align:center; padding:22px 8px; font-style:italic;}
+
+  .drop-zone{
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:26px 18px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s;
+    margin-bottom:14px;
+  }
+  .drop-zone:hover, .drop-zone.drag{border-color:var(--coral); background:rgba(232,96,63,.05);}
+  .drop-zone .icon{font-size:22px; margin-bottom:8px;}
+  .drop-zone p{font-size:13px; color:var(--text-dim);}
+  .drop-zone p b{color:var(--text);}
+  #file-input{display:none;}
+  .file-chip{
+    display:none; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--field); color:var(--field-text); border-radius:8px;
+    padding:9px 12px; font-size:12.5px; margin-bottom:12px;
+  }
+  .file-chip .x{cursor:pointer; color:#8a4636; font-weight:700;}
+  .upload-log{
+    margin-top:14px; font-size:12px; color:var(--text-dim);
+    max-height:110px; overflow-y:auto;
+  }
+  .upload-log div{padding:4px 0; border-bottom:1px dashed var(--line);}
+  .upload-log div.ok{color:#8bd9a5;}
+  .upload-log div.err{color:#ffb4a3;}
+
+  .stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px;}
+  .stat{
+    background:var(--navy-600); border:1px solid var(--line); border-radius:10px;
+    padding:14px; text-align:center;
+  }
+  .stat b{display:block; font-size:20px; font-weight:700;}
+  .stat span{font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
+
+  .city-list{margin-top:6px;}
+  .city-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:12.5px;}
+  .city-row .name{width:90px; color:var(--text-dim); flex-shrink:0;}
+  .city-bar-track{flex:1; height:8px; background:var(--navy-600); border-radius:5px; overflow:hidden;}
+  .city-bar-fill{height:100%; background:linear-gradient(90deg, var(--coral), var(--coral-dark)); border-radius:5px;}
+  .city-row .count{width:22px; text-align:right; color:var(--text-dim);}
+
+  footer.foot{
+    text-align:center; font-size:11.5px; color:var(--text-dim); padding:24px 0 40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen">
+  <div class="grid-bg"></div>
+  <div class="login-card">
+    <div class="login-mark"><div class="dot"></div><span>Miguel Cloud</span></div>
+    <h1>Iniciar sesión</h1>
+    <p class="sub">Panel de administración · Gestión de clientes &amp; almacenamiento S3</p>
+
+    <label class="field-label">Usuario</label>
+    <input class="txt" id="login-user" type="text" placeholder="miguel" autocomplete="username">
+
+    <label class="field-label">Contraseña</label>
+    <input class="txt" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+
+    <button class="btn-primary" onclick="attemptLogin()">Entrar al dashboard</button>
+
+    <div class="login-hint">
+      Demo local — usuario: <b>miguel</b> · contraseña: <b>miguel2026</b><br>
+      Cambia estas credenciales en el código (busca <span class="mono">DEMO_USER</span>) antes de usarlo en producción.
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <h1>Mi pagina</h1>
+        <div class="who">Sesión de <span id="who-name">miguel</span></div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="status-pill"><div class="bulb"></div> S3 conectado vía URL prefirmada</div>
+      <button class="btn-ghost" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="title-row">
+      <h2>Gestión de clientes &amp; archivos</h2>
+      <p>Guarda tus clientes localmente y sube archivos directo a tu bucket de S3.</p>
+    </div>
+
+    <div class="panels">
+
+      <!-- Panel: Clientes -->
+      <div class="panel">
+        <h3>Gestión de clientes</h3>
+        <div class="form-stack">
+          <input class="txt" id="c-id" type="text" placeholder="ID Cliente">
+          <input class="txt" id="c-nombre" type="text" placeholder="Nombre">
+          <input class="txt" id="c-correo" type="email" placeholder="Correo">
+          <input class="txt" id="c-ciudad" type="text" placeholder="Ciudad">
+          <button class="btn-block" onclick="saveClient()">Guardar</button>
+        </div>
+
+        <div class="divider-label">Buscar</div>
+        <div class="row-2">
+          <input class="txt" id="c-search" type="text" placeholder="Buscar por ID">
+          <button class="btn-block secondary" onclick="searchClient()">Buscar</button>
+        </div>
+
+        <table class="client-table" id="client-table">
+          <thead>
+            <tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Ciudad</th><th></th></tr>
+          </thead>
+          <tbody id="client-tbody">
+            <tr class="empty-row"><td colspan="5">Aún no hay clientes guardados</td></tr>
+          </tbody>
+        </table>
+
+        <div class="stats-row">
+          <div class="stat"><b id="stat-total">0</b><span>Clientes</span></div>
+          <div class="stat"><b id="stat-cities">0</b><span>Ciudades</span></div>
+          <div class="stat"><b id="stat-files">0</b><span>Archivos subidos</span></div>
+        </div>
+      </div>
+
+      <!-- Panel: S3 + Ciudades -->
+      <div>
+        <div class="panel" style="margin-bottom:26px;">
+          <h3>Subir archivo a S3</h3>
+
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="icon">📁</div>
+            <p><b>Haz clic</b> o arrastra un archivo aquí</p>
+          </div>
+          <input type="file" id="file-input">
+          <div id="file-error" style="display:none; color:#ffb4a3; background:rgba(232,96,63,.12); border:1px solid rgba(232,96,63,.35); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:12px;"></div>
+          <div class="file-chip" id="file-chip">
+            <span id="file-name">—</span>
+            <span class="x" onclick="clearFile(event)">✕</span>
+          </div>
+
+          <button class="btn-block" onclick="uploadToS3()">Subir a S3</button>
+
+          <p style="font-size:11px;color:var(--text-dim);margin-top:10px;line-height:1.5;">
+            🔒 Subida segura vía URL pre-firmada (AWS Lambda + API Gateway). No se manejan credenciales en el navegador.
+          </p>
+
+          <div class="upload-log" id="upload-log"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Clientes por ciudad</h3>
+          <div class="city-list" id="city-list">
+            <p style="font-size:12.5px;color:var(--text-dim);">Agrega clientes para ver la distribución por ciudad.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="foot">Miguel Cloud Dashboard — proyecto académico</footer>
+</div>
+
+<script>
+  const DEMO_USER = "miguel";
+  const DEMO_PASS = "miguel2026";
+
+  function attemptLogin(){
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    const err = document.getElementById('login-error');
+    if(u === DEMO_USER && p === DEMO_PASS){
+      err.style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('who-name').textContent = u;
+      renderClients();
+    } else {
+      err.style.display = 'block';
+    }
+  }
+
+  document.getElementById('login-pass').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') attemptLogin();
+  });
+
+  function logout(){
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+
+  // ---------- Clients (localStorage) ----------
+  function getClients(){
+    return JSON.parse(localStorage.getItem('miguel_clients') || '[]');
+  }
+  function setClients(list){
+    localStorage.setItem('miguel_clients', JSON.stringify(list));
+  }
+
+  function saveClient(){
+    const id = document.getElementById('c-id').value.trim();
+    const nombre = document.getElementById('c-nombre').value.trim();
+    const correo = document.getElementById('c-correo').value.trim();
+    const ciudad = document.getElementById('c-ciudad').value.trim();
+    if(!id || !nombre){ alert('El ID y el nombre son obligatorios.'); return; }
+
+    let list = getClients();
+    const idx = list.findIndex(c => c.id === id);
+    const record = {id, nombre, correo, ciudad};
+    if(idx >= 0) list[idx] = record; else list.push(record);
+    setClients(list);
+
+    ['c-id','c-nombre','c-correo','c-ciudad'].forEach(f => document.getElementById(f).value = '');
+    renderClients();
+  }
+
+  function deleteClient(id){
+    setClients(getClients().filter(c => c.id !== id));
+    renderClients();
+  }
+
+  function searchClient(){
+    const q = document.getElementById('c-search').value.trim().toLowerCase();
+    renderClients(q ? getClients().filter(c => c.id.toLowerCase().includes(q)) : getClients());
+  }
+
+  function renderClients(list){
+    const clients = list || getClients();
+    const tbody = document.getElementById('client-tbody');
+    tbody.innerHTML = '';
+    if(clients.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aún no hay clientes guardados</td></tr>';
+    } else {
+      clients.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(c.id)}</td><td>${escapeHtml(c.nombre)}</td><td>${escapeHtml(c.correo||'—')}</td><td>${escapeHtml(c.ciudad||'—')}</td>
+          <td><span class="x" style="cursor:pointer;color:#ffb4a3;" onclick="deleteClient('${escapeHtml(c.id)}')">✕</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const all = getClients();
+    document.getElementById('stat-total').textContent = all.length;
+    const cities = {};
+    all.forEach(c => { const city = c.ciudad || 'Sin ciudad'; cities[city] = (cities[city]||0)+1; });
+    document.getElementById('stat-cities').textContent = Object.keys(cities).length;
+
+    const cityList = document.getElementById('city-list');
+    if(all.length === 0){
+      cityList.innerHTML = '<p style="font-size:12.5px;color:var(--text-dim);">Agrega clientes para ver la distribución por ciudad.</p>';
+    } else {
+      const max = Math.max(...Object.values(cities));
+      cityList.innerHTML = Object.entries(cities)
+        .sort((a,b)=>b[1]-a[1])
+        .map(([city,count]) => `
+          <div class="city-row">
+            <div class="name">${escapeHtml(city)}</div>
+            <div class="city-bar-track"><div class="city-bar-fill" style="width:${(count/max*100)}%"></div></div>
+            <div class="count">${count}</div>
+          </div>`).join('');
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ---------- API de URL pre-firmada ----------
+  const API_URL = "https://x31uc0n5vk.execute-api.us-east-1.amazonaws.com/prod/generarURL";
+
+  // ---------- File upload ----------
+  let selectedFile = null;
+  const fileInput = document.getElementById('file-input');
+  const dropZone = document.getElementById('drop-zone');
+
+  fileInput.addEventListener('change', e => setFile(e.target.files[0]));
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag');
+    if(e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+  });
+
+  const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+  const EXTENSIONES_BLOQUEADAS = ['.exe', '.bat', '.cmd', '.msi', '.sh'];
+
+  function mostrarErrorArchivo(mensaje){
+    const errorBox = document.getElementById('file-error');
+    errorBox.textContent = mensaje;
+    errorBox.style.display = 'block';
+  }
+  function ocultarErrorArchivo(){
+    document.getElementById('file-error').style.display = 'none';
+  }
+
+  function setFile(f){
+    ocultarErrorArchivo();
+    const nombreLower = f.name.toLowerCase();
+    const extensionBloqueada = EXTENSIONES_BLOQUEADAS.find(ext => nombreLower.endsWith(ext));
+
+    if(extensionBloqueada){
+      mostrarErrorArchivo(`🚫 Archivo no permitido: los archivos "${extensionBloqueada}" están bloqueados por seguridad.`);
+      fileInput.value = '';
+      document.getElementById('file-chip').style.display = 'none';
+      selectedFile = null;
+      return;
+    }
+
+    if(f.size > MAX_SIZE_BYTES){
+      const tamañoMB = (f.size / (1024*1024)).toFixed(2);
+      mostrarErrorArchivo(`🚫 Archivo demasiado grande: pesa ${tamañoMB} MB, y el máximo permitido es 10 MB.`);
+      fileInput.value = '';
+      document.getElementById('file-chip').style.display = 'none';
+      selectedFile = null;
+      return;
+    }
+
+    selectedFile = f;
+    document.getElementById('file-name').textContent = f.name + ' · ' + Math.ceil(f.size/1024) + ' KB';
+    document.getElementById('file-chip').style.display = 'flex';
+  }
+  function clearFile(e){
+    e.stopPropagation();
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('file-chip').style.display = 'none';
+  }
+
+  function logMsg(msg, type){
+    const log = document.getElementById('upload-log');
+    const div = document.createElement('div');
+    div.className = type || '';
+    div.textContent = msg;
+    log.prepend(div);
+  }
+
+  async function uploadToS3(){
+    if(!selectedFile){ logMsg('Selecciona un archivo primero.', 'err'); return; }
+
+    try{
+      logMsg('Generando URL pre-firmada para ' + selectedFile.name + '…');
+      const resp = await fetch(`${API_URL}?archivo=${encodeURIComponent(selectedFile.name)}`);
+      if(!resp.ok) throw new Error('No se pudo generar la URL (' + resp.status + ')');
+      const data = await resp.json();
+      const urlPresignada = data.url;
+
+      logMsg('Subiendo ' + selectedFile.name + '…');
+      const subida = await fetch(urlPresignada, {
+        method: 'PUT',
+        body: selectedFile
+      });
+
+      if(!subida.ok) throw new Error('Error al subir a S3 (' + subida.status + ')');
+
+      logMsg('Subido correctamente: ' + selectedFile.name, 'ok');
+      const filesCount = parseInt(localStorage.getItem('miguel_files_count') || '0') + 1;
+      localStorage.setItem('miguel_files_count', filesCount);
+      document.getElementById('stat-files').textContent = filesCount;
+      clearFile({stopPropagation(){}});
+    } catch(err){
+      logMsg('Error: ' + err.message, 'err');
+    }
+  }
+
+  document.getElementById('stat-files').textContent = localStorage.getItem('miguel_files_count') || '0';
+</script>
+
+</body>
+</html>

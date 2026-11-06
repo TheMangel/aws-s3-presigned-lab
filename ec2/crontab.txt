@@ -1,0 +1,19 @@
+# Instalar y activar cron en Amazon Linux 2023:
+#   sudo yum install cronie -y
+#   sudo systemctl enable crond
+#   sudo systemctl start crond
+#
+# Editar con:  crontab -e   (en vi: tecla i para escribir, Esc, luego :wq)
+# Ver con:     crontab -l
+#
+# La hora del servidor es UTC = hora Colombia + 5.
+# Formato: minuto hora dia mes dia_semana comando
+#
+# Apagar la instancia todos los dias a las 19:00 UTC (14:00 Colombia):
+0 19 * * * /usr/bin/aws ec2 stop-instances --instance-ids TU_INSTANCE_ID >> /home/ec2-user/cron_ec2_shutdown.log 2>&1
+
+# Ejemplos:
+#   Todos los dias 01:40 UTC (20:40 Colombia):   40 1 * * *
+#   Minutos 25 a 30 de la hora 02 UTC:           25-30 2 * * *
+#
+# Ver ejecuciones:  sudo journalctl -u crond | grep CROND
